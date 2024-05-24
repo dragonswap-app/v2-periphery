@@ -35,7 +35,7 @@ contract Quoter is IQuoter, IDragonswapV2SwapCallback, PeripheryImmutableState {
     }
 
     /// @inheritdoc IDragonswapV2SwapCallback
-    function dragonswapV3SwapCallback(
+    function dragonswapV2SwapCallback(
         int256 amount0Delta,
         int256 amount1Delta,
         bytes memory path

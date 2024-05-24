@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.7.5;
-pragma abicoder v2;
+pragma abicoder v1;
 
-import '@dragonswap/v2-core/contracts/interfaces/callback/IDragonswapV2SwapCallback.sol';
+import '@dragonswap/v1-core/contracts/interfaces/callback/IDragonswapV1SwapCallback.sol';
 
 /// @title Router token swapping functionality
-/// @notice Functions for swapping tokens via Dragonswap V2
-interface ISwapRouter is IDragonswapV2SwapCallback {
+/// @notice Functions for swapping tokens via Dragonswap V1
+interface ISwapRouter is IDragonswapV1SwapCallback {
     struct ExactInputSingleParams {
         address tokenIn;
         address tokenOut;

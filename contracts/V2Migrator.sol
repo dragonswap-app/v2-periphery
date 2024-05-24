@@ -9,7 +9,7 @@ import './interfaces/INonfungiblePositionManager.sol';
 
 import './libraries/TransferHelper.sol';
 
-import './interfaces/IV3Migrator.sol';
+import './interfaces/IV2Migrator.sol';
 import './base/PeripheryImmutableState.sol';
 import './base/Multicall.sol';
 import './base/SelfPermit.sol';
@@ -17,7 +17,7 @@ import './interfaces/external/IWETH9.sol';
 import './base/PoolInitializer.sol';
 
 /// @title Dragonswap V2 Migrator
-contract V3Migrator is IV3Migrator, PeripheryImmutableState, PoolInitializer, Multicall, SelfPermit {
+contract V2Migrator is IV2Migrator, PeripheryImmutableState, PoolInitializer, Multicall, SelfPermit {
     using LowGasSafeMath for uint256;
 
     address public immutable nonfungiblePositionManager;
@@ -51,7 +51,7 @@ contract V3Migrator is IV3Migrator, PeripheryImmutableState, PoolInitializer, Mu
         TransferHelper.safeApprove(params.token1, nonfungiblePositionManager, amount1V2ToMigrate);
 
         // mint v2 position
-        (, , uint256 amount0V3, uint256 amount1V3) =
+        (, , uint256 amount0V2, uint256 amount1V2) =
             INonfungiblePositionManager(nonfungiblePositionManager).mint(
                 INonfungiblePositionManager.MintParams({
                     token0: params.token0,
@@ -69,12 +69,12 @@ contract V3Migrator is IV3Migrator, PeripheryImmutableState, PoolInitializer, Mu
             );
 
         // if necessary, clear allowance and refund dust
-        if (amount0V3 < amount0V2) {
-            if (amount0V3 < amount0V2ToMigrate) {
+        if (amount0V2 < amount0V2) {
+            if (amount0V2 < amount0V2ToMigrate) {
                 TransferHelper.safeApprove(params.token0, nonfungiblePositionManager, 0);
             }
 
-            uint256 refund0 = amount0V2 - amount0V3;
+            uint256 refund0 = amount0V2 - amount0V2;
             if (params.refundAsETH && params.token0 == WETH9) {
                 IWETH9(WETH9).withdraw(refund0);
                 TransferHelper.safeTransferETH(msg.sender, refund0);
@@ -82,12 +82,12 @@ contract V3Migrator is IV3Migrator, PeripheryImmutableState, PoolInitializer, Mu
                 TransferHelper.safeTransfer(params.token0, msg.sender, refund0);
             }
         }
-        if (amount1V3 < amount1V2) {
-            if (amount1V3 < amount1V2ToMigrate) {
+        if (amount1V2 < amount1V2) {
+            if (amount1V2 < amount1V2ToMigrate) {
                 TransferHelper.safeApprove(params.token1, nonfungiblePositionManager, 0);
             }
 
-            uint256 refund1 = amount1V2 - amount1V3;
+            uint256 refund1 = amount1V2 - amount1V2;
             if (params.refundAsETH && params.token1 == WETH9) {
                 IWETH9(WETH9).withdraw(refund1);
                 TransferHelper.safeTransferETH(msg.sender, refund1);

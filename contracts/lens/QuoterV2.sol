@@ -5,8 +5,8 @@ pragma abicoder v2;
 import '@dragonswap/v2-core/contracts/libraries/SafeCast.sol';
 import '@dragonswap/v2-core/contracts/libraries/TickMath.sol';
 import '@dragonswap/v2-core/contracts/libraries/TickBitmap.sol';
-import '@dragonswap/v2-core/contracts/interfaces/IDragonswapV3Pool.sol';
-import '@dragonswap/v2-core/contracts/interfaces/callback/IDragonswapV3SwapCallback.sol';
+import '@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Pool.sol';
+import '@dragonswap/v2-core/contracts/interfaces/callback/IDragonswapV2SwapCallback.sol';
 
 import '../interfaces/IQuoterV2.sol';
 import '../base/PeripheryImmutableState.sol';
@@ -19,10 +19,10 @@ import '../libraries/PoolTicksCounter.sol';
 /// @notice Allows getting the expected amount out or amount in for a given swap without executing the swap
 /// @dev These functions are not gas efficient and should _not_ be called on chain. Instead, optimistically execute
 /// the swap and check the amounts in the callback.
-contract QuoterV2 is IQuoterV2, IDragonswapV3SwapCallback, PeripheryImmutableState {
+contract QuoterV2 is IQuoterV2, IDragonswapV2SwapCallback, PeripheryImmutableState {
     using Path for bytes;
     using SafeCast for uint256;
-    using PoolTicksCounter for IDragonswapV3Pool;
+    using PoolTicksCounter for IDragonswapV2Pool;
 
     /// @dev Transient storage variable used to check a safety condition in exact output swaps.
     uint256 private amountOutCached;
@@ -33,11 +33,11 @@ contract QuoterV2 is IQuoterV2, IDragonswapV3SwapCallback, PeripheryImmutableSta
         address tokenA,
         address tokenB,
         uint24 fee
-    ) private view returns (IDragonswapV3Pool) {
-        return IDragonswapV3Pool(PoolAddress.computeAddress(factory, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
+    ) private view returns (IDragonswapV2Pool) {
+        return IDragonswapV2Pool(PoolAddress.computeAddress(factory, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
     }
 
-    /// @inheritdoc IDragonswapV3SwapCallback
+    /// @inheritdoc IDragonswapV2SwapCallback
     function dragonswapV2SwapCallback(
         int256 amount0Delta,
         int256 amount1Delta,
@@ -52,7 +52,7 @@ contract QuoterV2 is IQuoterV2, IDragonswapV3SwapCallback, PeripheryImmutableSta
                 ? (tokenIn < tokenOut, uint256(amount0Delta), uint256(-amount1Delta))
                 : (tokenOut < tokenIn, uint256(amount1Delta), uint256(-amount0Delta));
 
-        IDragonswapV3Pool pool = getPool(tokenIn, tokenOut, fee);
+        IDragonswapV2Pool pool = getPool(tokenIn, tokenOut, fee);
         (uint160 sqrtPriceX96After, int24 tickAfter, , , , , ) = pool.slot0();
 
         if (isExactInput) {
@@ -98,7 +98,7 @@ contract QuoterV2 is IQuoterV2, IDragonswapV3SwapCallback, PeripheryImmutableSta
 
     function handleRevert(
         bytes memory reason,
-        IDragonswapV3Pool pool,
+        IDragonswapV2Pool pool,
         uint256 gasEstimate
     )
         private
@@ -131,7 +131,7 @@ contract QuoterV2 is IQuoterV2, IDragonswapV3SwapCallback, PeripheryImmutableSta
         )
     {
         bool zeroForOne = params.tokenIn < params.tokenOut;
-        IDragonswapV3Pool pool = getPool(params.tokenIn, params.tokenOut, params.fee);
+        IDragonswapV2Pool pool = getPool(params.tokenIn, params.tokenOut, params.fee);
 
         uint256 gasBefore = gasleft();
         try
@@ -205,7 +205,7 @@ contract QuoterV2 is IQuoterV2, IDragonswapV3SwapCallback, PeripheryImmutableSta
         )
     {
         bool zeroForOne = params.tokenIn < params.tokenOut;
-        IDragonswapV3Pool pool = getPool(params.tokenIn, params.tokenOut, params.fee);
+        IDragonswapV2Pool pool = getPool(params.tokenIn, params.tokenOut, params.fee);
 
         // if no price limit has been specified, cache the output amount for comparison in the swap callback
         if (params.sqrtPriceLimitX96 == 0) amountOutCached = params.amount;

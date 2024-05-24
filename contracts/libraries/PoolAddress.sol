@@ -27,9 +27,9 @@ library PoolAddress {
     }
 
     /// @notice Deterministically computes the pool address given the factory and PoolKey
-    /// @param factory The Uniswap V3 factory contract address
+    /// @param factory The Dragonswap V2 factory contract address
     /// @param key The PoolKey
-    /// @return pool The contract address of the V3 pool
+    /// @return pool The contract address of the V2 pool
     function computeAddress(address factory, PoolKey memory key) internal pure returns (address pool) {
         require(key.token0 < key.token1);
         pool = address(
