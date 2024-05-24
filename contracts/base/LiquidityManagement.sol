@@ -2,8 +2,8 @@
 pragma solidity =0.7.6;
 pragma abicoder v2;
 
-import '@dragonswap/v2-core/contracts/interfaces/IDragonswapv2Factory.sol';
-import '@dragonswap/v2-core/contracts/interfaces/callback/IDragonswapv2MintCallback.sol';
+import '@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Factory.sol';
+import '@dragonswap/v2-core/contracts/interfaces/callback/IDragonswapV2MintCallback.sol';
 import '@dragonswap/v2-core/contracts/libraries/TickMath.sol';
 
 import '../libraries/PoolAddress.sol';
@@ -15,14 +15,14 @@ import './PeripheryImmutableState.sol';
 
 /// @title Liquidity management functions
 /// @notice Internal functions for safely managing liquidity in Dragonswap v2
-abstract contract LiquidityManagement is IDragonswapv2MintCallback, PeripheryImmutableState, PeripheryPayments {
+abstract contract LiquidityManagement is IDragonswapV2MintCallback, PeripheryImmutableState, PeripheryPayments {
     struct MintCallbackData {
         PoolAddress.PoolKey poolKey;
         address payer;
     }
 
-    /// @inheritdoc IDragonswapv2MintCallback
-    function dragonswapv2MintCallback(
+    /// @inheritdoc IDragonswapV2MintCallback
+    function dragonswapV2MintCallback(
         uint256 amount0Owed,
         uint256 amount1Owed,
         bytes calldata data
@@ -54,13 +54,13 @@ abstract contract LiquidityManagement is IDragonswapv2MintCallback, PeripheryImm
             uint128 liquidity,
             uint256 amount0,
             uint256 amount1,
-            IDragonswapv2Pool pool
+            IDragonswapV2Pool pool
         )
     {
         PoolAddress.PoolKey memory poolKey =
             PoolAddress.PoolKey({token0: params.token0, token1: params.token1, fee: params.fee});
 
-        pool = IDragonswapv2Pool(PoolAddress.computeAddress(factory, poolKey));
+        pool = IDragonswapV2Pool(PoolAddress.computeAddress(factory, poolKey));
 
         // compute the liquidity amount
         {

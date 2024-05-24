@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.7.5;
-pragma abicoder v1;
+pragma abicoder v2;
 
 /// @title Creates and initializes v1 Pools
 /// @notice Provides a method for creating and initializing a pool, if necessary, for bundling with other methods that

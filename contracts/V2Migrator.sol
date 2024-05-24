@@ -40,15 +40,15 @@ contract V2Migrator is IV2Migrator, PeripheryImmutableState, PoolInitializer, Mu
 
         // burn v1 liquidity to this address
         IDragonswapPair(params.pair).transferFrom(msg.sender, params.pair, params.liquidityToMigrate);
-        (uint256 amount0V2, uint256 amount1V2) = IDragonswapPair(params.pair).burn(address(this));
+        (uint256 amount0V1, uint256 amount1V1) = IDragonswapPair(params.pair).burn(address(this));
 
         // calculate the amounts to migrate to v2
-        uint256 amount0V2ToMigrate = amount0V2.mul(params.percentageToMigrate) / 100;
-        uint256 amount1V2ToMigrate = amount1V2.mul(params.percentageToMigrate) / 100;
+        uint256 amount0V1ToMigrate = amount0V1.mul(params.percentageToMigrate) / 100;
+        uint256 amount1V1ToMigrate = amount1V1.mul(params.percentageToMigrate) / 100;
 
         // approve the position manager up to the maximum token amounts
-        TransferHelper.safeApprove(params.token0, nonfungiblePositionManager, amount0V2ToMigrate);
-        TransferHelper.safeApprove(params.token1, nonfungiblePositionManager, amount1V2ToMigrate);
+        TransferHelper.safeApprove(params.token0, nonfungiblePositionManager, amount0V1ToMigrate);
+        TransferHelper.safeApprove(params.token1, nonfungiblePositionManager, amount1V1ToMigrate);
 
         // mint v2 position
         (, , uint256 amount0V2, uint256 amount1V2) =
@@ -59,8 +59,8 @@ contract V2Migrator is IV2Migrator, PeripheryImmutableState, PoolInitializer, Mu
                     fee: params.fee,
                     tickLower: params.tickLower,
                     tickUpper: params.tickUpper,
-                    amount0Desired: amount0V2ToMigrate,
-                    amount1Desired: amount1V2ToMigrate,
+                    amount0Desired: amount0V1ToMigrate,
+                    amount1Desired: amount1V1ToMigrate,
                     amount0Min: params.amount0Min,
                     amount1Min: params.amount1Min,
                     recipient: params.recipient,
@@ -69,12 +69,12 @@ contract V2Migrator is IV2Migrator, PeripheryImmutableState, PoolInitializer, Mu
             );
 
         // if necessary, clear allowance and refund dust
-        if (amount0V2 < amount0V2) {
-            if (amount0V2 < amount0V2ToMigrate) {
+        if (amount0V2 < amount0V1) {
+            if (amount0V2 < amount0V1ToMigrate) {
                 TransferHelper.safeApprove(params.token0, nonfungiblePositionManager, 0);
             }
 
-            uint256 refund0 = amount0V2 - amount0V2;
+            uint256 refund0 = amount0V1 - amount0V2;
             if (params.refundAsETH && params.token0 == WETH9) {
                 IWETH9(WETH9).withdraw(refund0);
                 TransferHelper.safeTransferETH(msg.sender, refund0);
@@ -82,12 +82,12 @@ contract V2Migrator is IV2Migrator, PeripheryImmutableState, PoolInitializer, Mu
                 TransferHelper.safeTransfer(params.token0, msg.sender, refund0);
             }
         }
-        if (amount1V2 < amount1V2) {
-            if (amount1V2 < amount1V2ToMigrate) {
+        if (amount1V2 < amount1V1) {
+            if (amount1V2 < amount1V1ToMigrate) {
                 TransferHelper.safeApprove(params.token1, nonfungiblePositionManager, 0);
             }
 
-            uint256 refund1 = amount1V2 - amount1V2;
+            uint256 refund1 = amount1V1 - amount1V2;
             if (params.refundAsETH && params.token1 == WETH9) {
                 IWETH9(WETH9).withdraw(refund1);
                 TransferHelper.safeTransferETH(msg.sender, refund1);

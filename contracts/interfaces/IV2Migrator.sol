@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.7.5;
-pragma abicoder v1;
+pragma abicoder v2;
 
 import './IMulticall.sol';
 import './ISelfPermit.sol';
 import './IPoolInitializer.sol';
 
-/// @title v1 Migrator
-/// @notice Enables migration of liqudity from Dragonswap v1-compatible pairs into Dragonswap v1 pools
-interface Iv1Migrator is IMulticall, ISelfPermit, IPoolInitializer {
+/// @title V2 Migrator
+/// @notice Enables migration of liqudity from Dragonswap v1-compatible pairs into Dragonswap v2 pools
+interface IV2Migrator is IMulticall, ISelfPermit, IPoolInitializer {
     struct MigrateParams {
         address pair; // the Dragonswap v1-compatible pair
         uint256 liquidityToMigrate; // expected to be balanceOf(msg.sender)
@@ -25,9 +25,9 @@ interface Iv1Migrator is IMulticall, ISelfPermit, IPoolInitializer {
         bool refundAsETH;
     }
 
-    /// @notice Migrates liquidity to v1 by burning v1 liquidity and minting a new position for v1
+    /// @notice Migrates liquidity to v2 by burning v1 liquidity and minting a new position for v2
     /// @dev Slippage protection is enforced via `amount{0,1}Min`, which should be a discount of the expected values of
-    /// the maximum amount of v1 liquidity that the v1 liquidity can get. For the special case of migrating to an
+    /// the maximum amount of v2 liquidity that the v1 liquidity can get. For the special case of migrating to an
     /// out-of-range position, `amount{0,1}Min` may be set to 0, enforcing that the position remains out of range
     /// @param params The params necessary to migrate v1 liquidity, encoded as `MigrateParams` in calldata
     function migrate(MigrateParams calldata params) external;
