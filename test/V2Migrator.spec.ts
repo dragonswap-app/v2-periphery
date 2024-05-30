@@ -2,17 +2,17 @@ import { Fixture } from 'ethereum-waffle'
 import { constants, Contract, Wallet } from 'ethers'
 import { ethers, waffle } from 'hardhat'
 import {
-  IUniswapV2Pair,
-  IUniswapV3Factory,
+  IDragonswapPair,
+  IDragonswapV2Factory,
   IWETH9,
   MockTimeNonfungiblePositionManager,
   TestERC20,
-  V3Migrator,
+  V2Migrator,
 } from '../typechain'
 import completeFixture from './shared/completeFixture'
-import { v2FactoryFixture } from './shared/externalFixtures'
+import { v1FactoryFixture } from './shared/externalFixtures'
 
-import { abi as PAIR_V2_ABI } from '@uniswap/v2-core/build/UniswapV2Pair.json'
+import { abi as PAIR_V1_ABI } from '../artifacts/@dragonswap/core/contracts/interfaces/IDragonswapPair.sol/IDragonswapPair.json'
 import { expect } from 'chai'
 import { FeeAmount } from './shared/constants'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
@@ -20,36 +20,36 @@ import snapshotGasCost from './shared/snapshotGasCost'
 import { sortedTokens } from './shared/tokenSort'
 import { getMaxTick, getMinTick } from './shared/ticks'
 
-describe('V3Migrator', () => {
+describe('V2Migrator', () => {
   let wallet: Wallet
 
   const migratorFixture: Fixture<{
-    factoryV2: Contract
-    factoryV3: IUniswapV3Factory
+    factoryV1: Contract
+    factoryV2: IDragonswapV2Factory
     token: TestERC20
     weth9: IWETH9
     nft: MockTimeNonfungiblePositionManager
-    migrator: V3Migrator
+    migrator: V2Migrator
   }> = async (wallets, provider) => {
     const { factory, tokens, nft, weth9 } = await completeFixture(wallets, provider)
 
-    const { factory: factoryV2 } = await v2FactoryFixture(wallets, provider)
+    const { factory: factoryV1 } = await v1FactoryFixture(wallets, provider)
 
     const token = tokens[0]
-    await token.approve(factoryV2.address, constants.MaxUint256)
+    await token.approve(factoryV1.address, constants.MaxUint256)
     await weth9.deposit({ value: 10000 })
     await weth9.approve(nft.address, constants.MaxUint256)
 
     // deploy the migrator
-    const migrator = (await (await ethers.getContractFactory('V3Migrator')).deploy(
+    const migrator = (await (await ethers.getContractFactory('V2Migrator')).deploy(
       factory.address,
       weth9.address,
       nft.address
-    )) as V3Migrator
+    )) as V2Migrator
 
     return {
-      factoryV2,
-      factoryV3: factory,
+      factoryV1,
+      factoryV2: factory,
       token,
       weth9,
       nft,
@@ -57,13 +57,13 @@ describe('V3Migrator', () => {
     }
   }
 
-  let factoryV2: Contract
-  let factoryV3: IUniswapV3Factory
+  let factoryV1: Contract
+  let factoryV2: IDragonswapV2Factory
   let token: TestERC20
   let weth9: IWETH9
   let nft: MockTimeNonfungiblePositionManager
-  let migrator: V3Migrator
-  let pair: IUniswapV2Pair
+  let migrator: V2Migrator
+  let pair: IDragonswapPair
 
   let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
 
@@ -77,15 +77,15 @@ describe('V3Migrator', () => {
   })
 
   beforeEach('load fixture', async () => {
-    ;({ factoryV2, factoryV3, token, weth9, nft, migrator } = await loadFixture(migratorFixture))
+    ;({ factoryV1, factoryV2, token, weth9, nft, migrator } = await loadFixture(migratorFixture))
   })
 
-  beforeEach('add V2 liquidity', async () => {
-    await factoryV2.createPair(token.address, weth9.address)
+  beforeEach('add V1 liquidity', async () => {
+    await factoryV1.createPair(token.address, weth9.address)
 
-    const pairAddress = await factoryV2.getPair(token.address, weth9.address)
+    const pairAddress = await factoryV1.getPair(token.address, weth9.address)
 
-    pair = new ethers.Contract(pairAddress, PAIR_V2_ABI, wallet) as IUniswapV2Pair
+    pair = new ethers.Contract(pairAddress, PAIR_V1_ABI, wallet) as IDragonswapPair
 
     await token.transfer(pair.address, 10000)
     await weth9.transfer(pair.address, 10000)
@@ -120,7 +120,7 @@ describe('V3Migrator', () => {
       tokenLower = token.address.toLowerCase() < weth9.address.toLowerCase()
     })
 
-    it('fails if v3 pool is not initialized', async () => {
+    it('fails if v2 pool is not initialized', async () => {
       await pair.approve(migrator.address, expectedLiquidity)
       await expect(
         migrator.migrate({
@@ -141,7 +141,7 @@ describe('V3Migrator', () => {
       ).to.be.reverted
     })
 
-    it('works once v3 pool is initialized', async () => {
+    it('works once v2 pool is initialized', async () => {
       const [token0, token1] = sortedTokens(weth9, token)
       await migrator.createAndInitializePoolIfNecessary(
         token0.address,
@@ -170,7 +170,7 @@ describe('V3Migrator', () => {
       const position = await nft.positions(1)
       expect(position.liquidity).to.be.eq(9000)
 
-      const poolAddress = await factoryV3.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
+      const poolAddress = await factoryV2.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
       expect(await token.balanceOf(poolAddress)).to.be.eq(9000)
       expect(await weth9.balanceOf(poolAddress)).to.be.eq(9000)
     })
@@ -213,7 +213,7 @@ describe('V3Migrator', () => {
       const position = await nft.positions(1)
       expect(position.liquidity).to.be.eq(4500)
 
-      const poolAddress = await factoryV3.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
+      const poolAddress = await factoryV2.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
       expect(await token.balanceOf(poolAddress)).to.be.eq(4500)
       expect(await weth9.balanceOf(poolAddress)).to.be.eq(4500)
     })
@@ -253,7 +253,7 @@ describe('V3Migrator', () => {
       const position = await nft.positions(1)
       expect(position.liquidity).to.be.eq(6363)
 
-      const poolAddress = await factoryV3.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
+      const poolAddress = await factoryV2.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
       if (token.address.toLowerCase() < weth9.address.toLowerCase()) {
         expect(await token.balanceOf(poolAddress)).to.be.eq(4500)
         expect(tokenBalanceAfter.sub(tokenBalanceBefore)).to.be.eq(4500)
@@ -302,7 +302,7 @@ describe('V3Migrator', () => {
       const position = await nft.positions(1)
       expect(position.liquidity).to.be.eq(6363)
 
-      const poolAddress = await factoryV3.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
+      const poolAddress = await factoryV2.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
       if (token.address.toLowerCase() < weth9.address.toLowerCase()) {
         expect(await token.balanceOf(poolAddress)).to.be.eq(8999)
         expect(tokenBalanceAfter.sub(tokenBalanceBefore)).to.be.eq(1)
@@ -353,7 +353,7 @@ describe('V3Migrator', () => {
       const position = await nft.positions(1)
       expect(position.liquidity).to.be.eq(6363)
 
-      const poolAddress = await factoryV3.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
+      const poolAddress = await factoryV2.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
       if (tokenLower) {
         expect(await token.balanceOf(poolAddress)).to.be.eq(4500)
         expect(tokenBalanceAfter.sub(tokenBalanceBefore)).to.be.eq(4500)
@@ -402,7 +402,7 @@ describe('V3Migrator', () => {
       const position = await nft.positions(1)
       expect(position.liquidity).to.be.eq(6363)
 
-      const poolAddress = await factoryV3.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
+      const poolAddress = await factoryV2.getPool(token.address, weth9.address, FeeAmount.MEDIUM)
       if (tokenLower) {
         expect(await token.balanceOf(poolAddress)).to.be.eq(8999)
         expect(tokenBalanceAfter.sub(tokenBalanceBefore)).to.be.eq(1)
