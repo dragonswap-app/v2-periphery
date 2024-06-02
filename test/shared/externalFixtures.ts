@@ -1,7 +1,4 @@
-import {
-  abi as FACTORY_V2_ABI,
-  bytecode as FACTORY_V2_BYTECODE,
-} from '../contracts/DragonswapV2Factory.json'
+import { abi as FACTORY_V2_ABI, bytecode as FACTORY_V2_BYTECODE } from '../contracts/DragonswapV2Factory.json'
 import { abi as FACTORY_V1_ABI, bytecode as FACTORY_V1_BYTECODE } from '../contracts/DragonswapFactory.json'
 import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'

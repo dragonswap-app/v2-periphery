@@ -24,7 +24,13 @@ contract TestDragonswapV2Callee is IDragonswapV2SwapCallback {
         address recipient,
         uint160 sqrtPriceLimitX96
     ) external {
-        IDragonswapV2Pool(pool).swap(recipient, true, -amount1Out.toInt256(), sqrtPriceLimitX96, abi.encode(msg.sender));
+        IDragonswapV2Pool(pool).swap(
+            recipient,
+            true,
+            -amount1Out.toInt256(),
+            sqrtPriceLimitX96,
+            abi.encode(msg.sender)
+        );
     }
 
     function swapExact1For0(
@@ -42,7 +48,13 @@ contract TestDragonswapV2Callee is IDragonswapV2SwapCallback {
         address recipient,
         uint160 sqrtPriceLimitX96
     ) external {
-        IDragonswapV2Pool(pool).swap(recipient, false, -amount0Out.toInt256(), sqrtPriceLimitX96, abi.encode(msg.sender));
+        IDragonswapV2Pool(pool).swap(
+            recipient,
+            false,
+            -amount0Out.toInt256(),
+            sqrtPriceLimitX96,
+            abi.encode(msg.sender)
+        );
     }
 
     function dragonswapV2SwapCallback(
