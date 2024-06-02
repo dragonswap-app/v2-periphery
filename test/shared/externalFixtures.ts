@@ -1,8 +1,8 @@
 import {
-  abi as FACTORY_ABI,
-  bytecode as FACTORY_BYTECODE,
-} from '../../artifacts/@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Factory.sol/IDragonswapV2Factory.json'
-import { abi as FACTORY_V2_ABI, bytecode as FACTORY_V2_BYTECODE } from '../../artifacts/@dragonswap/core/contracts/interfaces/IDragonswapFactory/IDragonswapFactory.json'
+  abi as FACTORY_V2_ABI,
+  bytecode as FACTORY_V2_BYTECODE,
+} from '../contracts/DragonswapV2Factory.json'
+import { abi as FACTORY_V1_ABI, bytecode as FACTORY_V1_BYTECODE } from '../contracts/DragonswapFactory.json'
 import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
 import { IDragonswapV2Factory, IWETH9, MockTimeSwapRouter } from '../../typechain'
@@ -24,8 +24,8 @@ export const v1FactoryFixture: Fixture<{ factory: Contract }> = async ([wallet])
   const factory = await waffle.deployContract(
     wallet,
     {
-      bytecode: FACTORY_V2_BYTECODE,
-      abi: FACTORY_V2_ABI,
+      bytecode: FACTORY_V1_BYTECODE,
+      abi: FACTORY_V1_ABI,
     },
     [constants.AddressZero]
   )
@@ -35,8 +35,8 @@ export const v1FactoryFixture: Fixture<{ factory: Contract }> = async ([wallet])
 
 const v2CoreFactoryFixture: Fixture<IDragonswapV2Factory> = async ([wallet]) => {
   return (await waffle.deployContract(wallet, {
-    bytecode: FACTORY_BYTECODE,
-    abi: FACTORY_ABI,
+    bytecode: FACTORY_V2_BYTECODE,
+    abi: FACTORY_V2_ABI,
   })) as IDragonswapV2Factory
 }
 

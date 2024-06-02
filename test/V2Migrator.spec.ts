@@ -12,7 +12,7 @@ import {
 import completeFixture from './shared/completeFixture'
 import { v1FactoryFixture } from './shared/externalFixtures'
 
-import { abi as PAIR_V1_ABI } from '../artifacts/@dragonswap/core/contracts/interfaces/IDragonswapPair.sol/IDragonswapPair.json'
+import { abi as PAIR_V1_ABI } from './contracts/DragonswapPair.json'
 import { expect } from 'chai'
 import { FeeAmount } from './shared/constants'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'

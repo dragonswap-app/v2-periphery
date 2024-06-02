@@ -1,4 +1,4 @@
-import { abi as IDragonswapV2PoolABI } from '../artifacts/@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Pool.sol/IDragonswapV2Pool.json'
+import { abi as DragonswapV2PoolABI } from './contracts/DragonswapV2Pool.json'
 import { Fixture } from 'ethereum-waffle'
 import { BigNumber, constants, ContractTransaction, Wallet } from 'ethers'
 import { ethers, waffle } from 'hardhat'
@@ -79,7 +79,7 @@ describe('SwapRouter gas tests', function () {
       factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM),
     ])
 
-    const pools = poolAddresses.map((poolAddress) => new ethers.Contract(poolAddress, IDragonswapV2PoolABI, wallet)) as [
+    const pools = poolAddresses.map((poolAddress) => new ethers.Contract(poolAddress, DragonswapV2PoolABI, wallet)) as [
       IDragonswapV2Pool,
       IDragonswapV2Pool,
       IDragonswapV2Pool

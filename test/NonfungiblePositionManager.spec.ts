@@ -1,4 +1,4 @@
-import { abi as IDragonswapV2PoolABI } from '../artifacts/@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Pool.sol/IDragonswapV2Pool.json'
+import { abi as DragonswapV2PoolABI } from './contracts/DragonswapV2Pool.json'
 import { Fixture } from 'ethereum-waffle'
 import { BigNumberish, constants, Wallet } from 'ethers'
 import { ethers, waffle } from 'hardhat'
@@ -130,7 +130,7 @@ describe('NonfungiblePositionManager', () => {
         FeeAmount.MEDIUM
       )
       await factory.createPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM)
-      const pool = new ethers.Contract(expectedAddress, IDragonswapV2PoolABI, wallet)
+      const pool = new ethers.Contract(expectedAddress, DragonswapV2PoolABI, wallet)
 
       await pool.initialize(encodePriceSqrt(3, 1))
       const code = await wallet.provider.getCode(expectedAddress)
