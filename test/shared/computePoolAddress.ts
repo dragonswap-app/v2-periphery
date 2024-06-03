@@ -1,8 +1,7 @@
 import { bytecode } from '../contracts/DragonswapV2Pool.json'
 import { utils } from 'ethers'
 
-export const POOL_BYTECODE_HASH = utils.keccak256(utils.toUtf8Bytes(bytecode))
-console.log(POOL_BYTECODE_HASH)
+export const POOL_BYTECODE_HASH = utils.keccak256(bytecode)
 
 export function computePoolAddress(factoryAddress: string, [tokenA, tokenB]: [string, string], fee: number): string {
   const [token0, token1] = tokenA.toLowerCase() < tokenB.toLowerCase() ? [tokenA, tokenB] : [tokenB, tokenA]
