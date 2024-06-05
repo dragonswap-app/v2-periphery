@@ -6,7 +6,6 @@ import { IDragonswapV2Factory, IWETH9, MockTimeSwapRouter } from '../../typechai
 
 import WETH9 from '../contracts/WETH9.json'
 import { Contract } from '@ethersproject/contracts'
-import { constants } from 'ethers'
 
 const wethFixture: Fixture<{ weth9: IWETH9 }> = async ([wallet]) => {
   const weth9 = (await waffle.deployContract(wallet, {
@@ -24,7 +23,7 @@ export const v1FactoryFixture: Fixture<{ factory: Contract }> = async ([wallet])
       bytecode: FACTORY_V1_BYTECODE,
       abi: FACTORY_V1_ABI,
     },
-    [constants.AddressZero]
+    ["0x0000000000000000000000000000000000000001"]
   )
 
   return { factory }
