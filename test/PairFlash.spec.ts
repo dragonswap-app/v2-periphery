@@ -1,7 +1,7 @@
 import { ethers, waffle } from 'hardhat'
 import { BigNumber, constants, Contract, ContractTransaction } from 'ethers'
 import {
-  IWETH9,
+  IWSEI,
   MockTimeNonfungiblePositionManager,
   MockTimeSwapRouter,
   PairFlash,
@@ -58,22 +58,22 @@ describe('PairFlash test', () => {
   }
 
   const flashFixture = async () => {
-    const { router, tokens, factory, weth9, nft } = await completeFixture(wallets, provider)
+    const { router, tokens, factory, wsei, nft } = await completeFixture(wallets, provider)
     const token0 = tokens[0]
     const token1 = tokens[1]
 
     const flashContractFactory = await ethers.getContractFactory('PairFlash')
-    const flash = (await flashContractFactory.deploy(router.address, factory.address, weth9.address)) as PairFlash
+    const flash = (await flashContractFactory.deploy(router.address, factory.address, wsei.address)) as PairFlash
 
     const quoterFactory = await ethers.getContractFactory('Quoter')
-    const quoter = (await quoterFactory.deploy(factory.address, weth9.address)) as Quoter
+    const quoter = (await quoterFactory.deploy(factory.address, wsei.address)) as Quoter
 
     return {
       token0,
       token1,
       flash,
       factory,
-      weth9,
+      wsei,
       nft,
       quoter,
       router,

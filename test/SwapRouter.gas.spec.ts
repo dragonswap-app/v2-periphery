@@ -2,7 +2,7 @@ import { abi as DragonswapV2PoolABI } from './contracts/DragonswapV2Pool.json'
 import { Fixture } from 'ethereum-waffle'
 import { BigNumber, constants, ContractTransaction, Wallet } from 'ethers'
 import { ethers, waffle } from 'hardhat'
-import { IDragonswapV2Pool, IWETH9, MockTimeSwapRouter, TestERC20 } from '../typechain'
+import { IDragonswapV2Pool, IWSEI, MockTimeSwapRouter, TestERC20 } from '../typechain'
 import completeFixture from './shared/completeFixture'
 import { FeeAmount, TICK_SPACINGS } from './shared/constants'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
@@ -18,12 +18,12 @@ describe('SwapRouter gas tests', function () {
   let trader: Wallet
 
   const swapRouterFixture: Fixture<{
-    weth9: IWETH9
+    wsei: IWSEI
     router: MockTimeSwapRouter
     tokens: [TestERC20, TestERC20, TestERC20]
     pools: [IDragonswapV2Pool, IDragonswapV2Pool, IDragonswapV2Pool]
   }> = async (wallets, provider) => {
-    const { weth9, factory, router, tokens, nft } = await completeFixture(wallets, provider)
+    const { wsei, factory, router, tokens, nft } = await completeFixture(wallets, provider)
 
     // approve & fund wallets
     for (const token of tokens) {
@@ -62,21 +62,21 @@ describe('SwapRouter gas tests', function () {
       return nft.mint(liquidityParams)
     }
 
-    async function createPoolWETH9(tokenAddress: string) {
-      await weth9.deposit({ value: liquidity * 2 })
-      await weth9.approve(nft.address, constants.MaxUint256)
-      return createPool(weth9.address, tokenAddress)
+    async function createPoolWSEI(tokenAddress: string) {
+      await wsei.deposit({ value: liquidity * 2 })
+      await wsei.approve(nft.address, constants.MaxUint256)
+      return createPool(wsei.address, tokenAddress)
     }
 
     // create pools
     await createPool(tokens[0].address, tokens[1].address)
     await createPool(tokens[1].address, tokens[2].address)
-    await createPoolWETH9(tokens[0].address)
+    await createPoolWSEI(tokens[0].address)
 
     const poolAddresses = await Promise.all([
       factory.getPool(tokens[0].address, tokens[1].address, FeeAmount.MEDIUM),
       factory.getPool(tokens[1].address, tokens[2].address, FeeAmount.MEDIUM),
-      factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM),
+      factory.getPool(wsei.address, tokens[0].address, FeeAmount.MEDIUM),
     ])
 
     const pools = poolAddresses.map((poolAddress) => new ethers.Contract(poolAddress, DragonswapV2PoolABI, wallet)) as [
@@ -86,14 +86,14 @@ describe('SwapRouter gas tests', function () {
     ]
 
     return {
-      weth9,
+      wsei,
       router,
       tokens,
       pools,
     }
   }
 
-  let weth9: IWETH9
+  let wsei: IWSEI
   let router: MockTimeSwapRouter
   let tokens: [TestERC20, TestERC20, TestERC20]
   let pools: [IDragonswapV2Pool, IDragonswapV2Pool, IDragonswapV2Pool]
@@ -108,7 +108,7 @@ describe('SwapRouter gas tests', function () {
   })
 
   beforeEach('load fixture', async () => {
-    ;({ router, weth9, tokens, pools } = await loadFixture(swapRouterFixture))
+    ;({ router, wsei, tokens, pools } = await loadFixture(swapRouterFixture))
   })
 
   async function exactInput(
@@ -116,21 +116,21 @@ describe('SwapRouter gas tests', function () {
     amountIn: number = 2,
     amountOutMinimum: number = 1
   ): Promise<ContractTransaction> {
-    const inputIsWETH = weth9.address === tokens[0]
-    const outputIsWETH9 = tokens[tokens.length - 1] === weth9.address
+    const inputIsWSEI = wsei.address === tokens[0]
+    const outputIsWSEI = tokens[tokens.length - 1] === wsei.address
 
-    const value = inputIsWETH ? amountIn : 0
+    const value = inputIsWSEI ? amountIn : 0
 
     const params = {
       path: encodePath(tokens, new Array(tokens.length - 1).fill(FeeAmount.MEDIUM)),
-      recipient: outputIsWETH9 ? constants.AddressZero : trader.address,
+      recipient: outputIsWSEI ? constants.AddressZero : trader.address,
       deadline: 1,
       amountIn,
-      amountOutMinimum: outputIsWETH9 ? 0 : amountOutMinimum, // save on calldata,
+      amountOutMinimum: outputIsWSEI ? 0 : amountOutMinimum, // save on calldata,
     }
 
     const data = [router.interface.encodeFunctionData('exactInput', [params])]
-    if (outputIsWETH9) data.push(router.interface.encodeFunctionData('unwrapWETH9', [amountOutMinimum, trader.address]))
+    if (outputIsWSEI) data.push(router.interface.encodeFunctionData('unwrapWSEI', [amountOutMinimum, trader.address]))
 
     // optimized for the gas test
     return data.length === 1
@@ -145,24 +145,24 @@ describe('SwapRouter gas tests', function () {
     amountOutMinimum: number = 1,
     sqrtPriceLimitX96?: BigNumber
   ): Promise<ContractTransaction> {
-    const inputIsWETH = weth9.address === tokenIn
-    const outputIsWETH9 = tokenOut === weth9.address
+    const inputIsWSEI = wsei.address === tokenIn
+    const outputIsWSEI = tokenOut === wsei.address
 
-    const value = inputIsWETH ? amountIn : 0
+    const value = inputIsWSEI ? amountIn : 0
 
     const params = {
       tokenIn,
       tokenOut,
       fee: FeeAmount.MEDIUM,
       sqrtPriceLimitX96: sqrtPriceLimitX96 ?? 0,
-      recipient: outputIsWETH9 ? constants.AddressZero : trader.address,
+      recipient: outputIsWSEI ? constants.AddressZero : trader.address,
       deadline: 1,
       amountIn,
-      amountOutMinimum: outputIsWETH9 ? 0 : amountOutMinimum, // save on calldata
+      amountOutMinimum: outputIsWSEI ? 0 : amountOutMinimum, // save on calldata
     }
 
     const data = [router.interface.encodeFunctionData('exactInputSingle', [params])]
-    if (outputIsWETH9) data.push(router.interface.encodeFunctionData('unwrapWETH9', [amountOutMinimum, trader.address]))
+    if (outputIsWSEI) data.push(router.interface.encodeFunctionData('unwrapWSEI', [amountOutMinimum, trader.address]))
 
     // optimized for the gas test
     return data.length === 1
@@ -174,22 +174,22 @@ describe('SwapRouter gas tests', function () {
     const amountInMaximum = 10 // we don't care
     const amountOut = 1
 
-    const inputIsWETH9 = tokens[0] === weth9.address
-    const outputIsWETH9 = tokens[tokens.length - 1] === weth9.address
+    const inputIsWSEI = tokens[0] === wsei.address
+    const outputIsWSEI = tokens[tokens.length - 1] === wsei.address
 
-    const value = inputIsWETH9 ? amountInMaximum : 0
+    const value = inputIsWSEI ? amountInMaximum : 0
 
     const params = {
       path: encodePath(tokens.slice().reverse(), new Array(tokens.length - 1).fill(FeeAmount.MEDIUM)),
-      recipient: outputIsWETH9 ? constants.AddressZero : trader.address,
+      recipient: outputIsWSEI ? constants.AddressZero : trader.address,
       deadline: 1,
       amountOut,
       amountInMaximum,
     }
 
     const data = [router.interface.encodeFunctionData('exactOutput', [params])]
-    if (inputIsWETH9) data.push(router.interface.encodeFunctionData('refundETH'))
-    if (outputIsWETH9) data.push(router.interface.encodeFunctionData('unwrapWETH9', [amountOut, trader.address]))
+    if (inputIsWSEI) data.push(router.interface.encodeFunctionData('refundSEI'))
+    if (outputIsWSEI) data.push(router.interface.encodeFunctionData('unwrapWSEI', [amountOut, trader.address]))
 
     return router.connect(trader).multicall(data, { value })
   }
@@ -201,16 +201,16 @@ describe('SwapRouter gas tests', function () {
     amountInMaximum: number = 3,
     sqrtPriceLimitX96?: BigNumber
   ): Promise<ContractTransaction> {
-    const inputIsWETH9 = tokenIn === weth9.address
-    const outputIsWETH9 = tokenOut === weth9.address
+    const inputIsWSEI = tokenIn === wsei.address
+    const outputIsWSEI = tokenOut === wsei.address
 
-    const value = inputIsWETH9 ? amountInMaximum : 0
+    const value = inputIsWSEI ? amountInMaximum : 0
 
     const params = {
       tokenIn,
       tokenOut,
       fee: FeeAmount.MEDIUM,
-      recipient: outputIsWETH9 ? constants.AddressZero : trader.address,
+      recipient: outputIsWSEI ? constants.AddressZero : trader.address,
       deadline: 1,
       amountOut,
       amountInMaximum,
@@ -218,8 +218,8 @@ describe('SwapRouter gas tests', function () {
     }
 
     const data = [router.interface.encodeFunctionData('exactOutputSingle', [params])]
-    if (inputIsWETH9) data.push(router.interface.encodeFunctionData('unwrapWETH9', [0, trader.address]))
-    if (outputIsWETH9) data.push(router.interface.encodeFunctionData('unwrapWETH9', [amountOut, trader.address]))
+    if (inputIsWSEI) data.push(router.interface.encodeFunctionData('unwrapWSEI', [0, trader.address]))
+    if (outputIsWSEI) data.push(router.interface.encodeFunctionData('unwrapWSEI', [amountOut, trader.address]))
 
     return router.connect(trader).multicall(data, { value })
   }
@@ -230,8 +230,8 @@ describe('SwapRouter gas tests', function () {
     await exactInput([tokens[1].address, tokens[0].address], 1, 0)
     await exactInput([tokens[1].address, tokens[2].address], 1, 0)
     await exactInput([tokens[2].address, tokens[1].address], 1, 0)
-    await exactInput([tokens[0].address, weth9.address], 1, 0)
-    await exactInput([weth9.address, tokens[0].address], 1, 0)
+    await exactInput([tokens[0].address, wsei.address], 1, 0)
+    await exactInput([wsei.address, tokens[0].address], 1, 0)
   })
 
   beforeEach('ensure feeGrowthGlobals are >0', async () => {
@@ -283,29 +283,29 @@ describe('SwapRouter gas tests', function () {
       )
     })
 
-    it('WETH9 -> 0', async () => {
+    it('WSEI -> 0', async () => {
       await snapshotGasCost(
         exactInput(
-          [weth9.address, tokens[0].address],
-          weth9.address.toLowerCase() < tokens[0].address.toLowerCase() ? 2 : 3
+          [wsei.address, tokens[0].address],
+          wsei.address.toLowerCase() < tokens[0].address.toLowerCase() ? 2 : 3
         )
       )
     })
 
-    it('0 -> WETH9', async () => {
+    it('0 -> WSEI', async () => {
       await snapshotGasCost(
         exactInput(
-          [tokens[0].address, weth9.address],
-          tokens[0].address.toLowerCase() < weth9.address.toLowerCase() ? 2 : 3
+          [tokens[0].address, wsei.address],
+          tokens[0].address.toLowerCase() < wsei.address.toLowerCase() ? 2 : 3
         )
       )
     })
 
     it('2 trades (via router)', async () => {
-      await weth9.connect(trader).deposit({ value: 3 })
-      await weth9.connect(trader).approve(router.address, constants.MaxUint256)
+      await wsei.connect(trader).deposit({ value: 3 })
+      await wsei.connect(trader).approve(router.address, constants.MaxUint256)
       const swap0 = {
-        path: encodePath([weth9.address, tokens[0].address], [FeeAmount.MEDIUM]),
+        path: encodePath([wsei.address, tokens[0].address], [FeeAmount.MEDIUM]),
         recipient: constants.AddressZero,
         deadline: 1,
         amountIn: 3,
@@ -330,10 +330,10 @@ describe('SwapRouter gas tests', function () {
     })
 
     it('3 trades (directly to sender)', async () => {
-      await weth9.connect(trader).deposit({ value: 3 })
-      await weth9.connect(trader).approve(router.address, constants.MaxUint256)
+      await wsei.connect(trader).deposit({ value: 3 })
+      await wsei.connect(trader).approve(router.address, constants.MaxUint256)
       const swap0 = {
-        path: encodePath([weth9.address, tokens[0].address], [FeeAmount.MEDIUM]),
+        path: encodePath([wsei.address, tokens[0].address], [FeeAmount.MEDIUM]),
         recipient: trader.address,
         deadline: 1,
         amountIn: 3,
@@ -367,10 +367,10 @@ describe('SwapRouter gas tests', function () {
   })
 
   it('3 trades (directly to sender)', async () => {
-    await weth9.connect(trader).deposit({ value: 3 })
-    await weth9.connect(trader).approve(router.address, constants.MaxUint256)
+    await wsei.connect(trader).deposit({ value: 3 })
+    await wsei.connect(trader).approve(router.address, constants.MaxUint256)
     const swap0 = {
-      path: encodePath([weth9.address, tokens[0].address], [FeeAmount.MEDIUM]),
+      path: encodePath([wsei.address, tokens[0].address], [FeeAmount.MEDIUM]),
       recipient: trader.address,
       deadline: 1,
       amountIn: 3,
@@ -398,22 +398,22 @@ describe('SwapRouter gas tests', function () {
       await snapshotGasCost(exactInputSingle(tokens[0].address, tokens[1].address))
     })
 
-    it('WETH9 -> 0', async () => {
+    it('WSEI -> 0', async () => {
       await snapshotGasCost(
         exactInputSingle(
-          weth9.address,
+          wsei.address,
           tokens[0].address,
-          weth9.address.toLowerCase() < tokens[0].address.toLowerCase() ? 2 : 3
+          wsei.address.toLowerCase() < tokens[0].address.toLowerCase() ? 2 : 3
         )
       )
     })
 
-    it('0 -> WETH9', async () => {
+    it('0 -> WSEI', async () => {
       await snapshotGasCost(
         exactInputSingle(
           tokens[0].address,
-          weth9.address,
-          tokens[0].address.toLowerCase() < weth9.address.toLowerCase() ? 2 : 3
+          wsei.address,
+          tokens[0].address.toLowerCase() < wsei.address.toLowerCase() ? 2 : 3
         )
       )
     })
@@ -428,12 +428,12 @@ describe('SwapRouter gas tests', function () {
       await snapshotGasCost(exactOutput(tokens.map((token) => token.address)))
     })
 
-    it('WETH9 -> 0', async () => {
-      await snapshotGasCost(exactOutput([weth9.address, tokens[0].address]))
+    it('WSEI -> 0', async () => {
+      await snapshotGasCost(exactOutput([wsei.address, tokens[0].address]))
     })
 
-    it('0 -> WETH9', async () => {
-      await snapshotGasCost(exactOutput([tokens[0].address, weth9.address]))
+    it('0 -> WSEI', async () => {
+      await snapshotGasCost(exactOutput([tokens[0].address, wsei.address]))
     })
   })
 
@@ -442,12 +442,12 @@ describe('SwapRouter gas tests', function () {
       await snapshotGasCost(exactOutputSingle(tokens[0].address, tokens[1].address))
     })
 
-    it('WETH9 -> 0', async () => {
-      await snapshotGasCost(exactOutputSingle(weth9.address, tokens[0].address))
+    it('WSEI -> 0', async () => {
+      await snapshotGasCost(exactOutputSingle(wsei.address, tokens[0].address))
     })
 
-    it('0 -> WETH9', async () => {
-      await snapshotGasCost(exactOutputSingle(tokens[0].address, weth9.address))
+    it('0 -> WSEI', async () => {
+      await snapshotGasCost(exactOutputSingle(tokens[0].address, wsei.address))
     })
   })
 })

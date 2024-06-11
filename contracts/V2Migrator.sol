@@ -13,7 +13,7 @@ import './interfaces/IV2Migrator.sol';
 import './base/PeripheryImmutableState.sol';
 import './base/Multicall.sol';
 import './base/SelfPermit.sol';
-import './interfaces/external/IWETH9.sol';
+import './interfaces/external/IWSEI.sol';
 import './base/PoolInitializer.sol';
 
 /// @title Dragonswap V2 Migrator
@@ -24,14 +24,14 @@ contract V2Migrator is IV2Migrator, PeripheryImmutableState, PoolInitializer, Mu
 
     constructor(
         address _factory,
-        address _WETH9,
+        address _WSEI,
         address _nonfungiblePositionManager
-    ) PeripheryImmutableState(_factory, _WETH9) {
+    ) PeripheryImmutableState(_factory, _WSEI) {
         nonfungiblePositionManager = _nonfungiblePositionManager;
     }
 
     receive() external payable {
-        require(msg.sender == WETH9, 'Not WETH9');
+        require(msg.sender == WSEI, 'Not WSEI');
     }
 
     function migrate(MigrateParams calldata params) external override {
@@ -75,9 +75,9 @@ contract V2Migrator is IV2Migrator, PeripheryImmutableState, PoolInitializer, Mu
             }
 
             uint256 refund0 = amount0V1 - amount0V2;
-            if (params.refundAsETH && params.token0 == WETH9) {
-                IWETH9(WETH9).withdraw(refund0);
-                TransferHelper.safeTransferETH(msg.sender, refund0);
+            if (params.refundAsSEI && params.token0 == WSEI) {
+                IWSEI(WSEI).withdraw(refund0);
+                TransferHelper.safeTransferSEI(msg.sender, refund0);
             } else {
                 TransferHelper.safeTransfer(params.token0, msg.sender, refund0);
             }
@@ -88,9 +88,9 @@ contract V2Migrator is IV2Migrator, PeripheryImmutableState, PoolInitializer, Mu
             }
 
             uint256 refund1 = amount1V1 - amount1V2;
-            if (params.refundAsETH && params.token1 == WETH9) {
-                IWETH9(WETH9).withdraw(refund1);
-                TransferHelper.safeTransferETH(msg.sender, refund1);
+            if (params.refundAsSEI && params.token1 == WSEI) {
+                IWSEI(WSEI).withdraw(refund1);
+                TransferHelper.safeTransferSEI(msg.sender, refund1);
             } else {
                 TransferHelper.safeTransfer(params.token1, msg.sender, refund1);
             }

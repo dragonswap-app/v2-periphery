@@ -23,8 +23,8 @@ contract PairFlash is IDragonswapV2FlashCallback, PeripheryPayments {
     constructor(
         ISwapRouter _swapRouter,
         address _factory,
-        address _WETH9
-    ) PeripheryImmutableState(_factory, _WETH9) {
+        address _WSEI
+    ) PeripheryImmutableState(_factory, _WSEI) {
         swapRouter = _swapRouter;
     }
 

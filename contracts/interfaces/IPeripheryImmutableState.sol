@@ -7,6 +7,6 @@ interface IPeripheryImmutableState {
     /// @return Returns the address of the Dragonswap v1 factory
     function factory() external view returns (address);
 
-    /// @return Returns the address of WETH9
-    function WETH9() external view returns (address);
+    /// @return Returns the address of WSEI
+    function WSEI() external view returns (address);
 }

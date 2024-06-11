@@ -15,7 +15,7 @@ import './base/SelfPermit.sol';
 import './libraries/Path.sol';
 import './libraries/PoolAddress.sol';
 import './libraries/CallbackValidation.sol';
-import './interfaces/external/IWETH9.sol';
+import './interfaces/external/IWSEI.sol';
 
 /// @title Dragonswap V2 Swap Router
 /// @notice Router for stateless execution of swaps against Dragonswap V2
@@ -37,7 +37,7 @@ contract SwapRouter is
     /// @dev Transient storage variable used for returning the computed amount in for an exact output swap.
     uint256 private amountInCached = DEFAULT_AMOUNT_IN_CACHED;
 
-    constructor(address _factory, address _WETH9) PeripheryImmutableState(_factory, _WETH9) {}
+    constructor(address _factory, address _WSEI) PeripheryImmutableState(_factory, _WSEI) {}
 
     /// @dev Returns the pool for the given token pair and fee. The pool contract may or may not exist.
     function getPool(

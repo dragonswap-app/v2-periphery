@@ -22,7 +22,7 @@ interface IV2Migrator is IMulticall, ISelfPermit, IPoolInitializer {
         uint256 amount1Min; // must be discounted by percentageToMigrate
         address recipient;
         uint256 deadline;
-        bool refundAsETH;
+        bool refundAsSEI;
     }
 
     /// @notice Migrates liquidity to v2 by burning v1 liquidity and minting a new position for v2

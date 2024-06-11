@@ -4,7 +4,7 @@ pragma solidity >=0.7.5;
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 import '../interfaces/IPeripheryPayments.sol';
-import '../interfaces/external/IWETH9.sol';
+import '../interfaces/external/IWSEI.sol';
 
 import '../libraries/TransferHelper.sol';
 
@@ -12,17 +12,17 @@ import './PeripheryImmutableState.sol';
 
 abstract contract PeripheryPayments is IPeripheryPayments, PeripheryImmutableState {
     receive() external payable {
-        require(msg.sender == WETH9, 'Not WETH9');
+        require(msg.sender == WSEI, 'Not WSEI');
     }
 
     /// @inheritdoc IPeripheryPayments
-    function unwrapWETH9(uint256 amountMinimum, address recipient) public payable override {
-        uint256 balanceWETH9 = IWETH9(WETH9).balanceOf(address(this));
-        require(balanceWETH9 >= amountMinimum, 'Insufficient WETH9');
+    function unwrapWSEI(uint256 amountMinimum, address recipient) public payable override {
+        uint256 balanceWSEI = IWSEI(WSEI).balanceOf(address(this));
+        require(balanceWSEI >= amountMinimum, 'Insufficient WSEI');
 
-        if (balanceWETH9 > 0) {
-            IWETH9(WETH9).withdraw(balanceWETH9);
-            TransferHelper.safeTransferETH(recipient, balanceWETH9);
+        if (balanceWSEI > 0) {
+            IWSEI(WSEI).withdraw(balanceWSEI);
+            TransferHelper.safeTransferSEI(recipient, balanceWSEI);
         }
     }
 
@@ -41,8 +41,8 @@ abstract contract PeripheryPayments is IPeripheryPayments, PeripheryImmutableSta
     }
 
     /// @inheritdoc IPeripheryPayments
-    function refundETH() external payable override {
-        if (address(this).balance > 0) TransferHelper.safeTransferETH(msg.sender, address(this).balance);
+    function refundSEI() external payable override {
+        if (address(this).balance > 0) TransferHelper.safeTransferSEI(msg.sender, address(this).balance);
     }
 
     /// @param token The token to pay
@@ -55,10 +55,10 @@ abstract contract PeripheryPayments is IPeripheryPayments, PeripheryImmutableSta
         address recipient,
         uint256 value
     ) internal {
-        if (token == WETH9 && address(this).balance >= value) {
-            // pay with WETH9
-            IWETH9(WETH9).deposit{value: value}(); // wrap only what is needed to pay
-            IWETH9(WETH9).transfer(recipient, value);
+        if (token == WSEI && address(this).balance >= value) {
+            // pay with WSEI
+            IWSEI(WSEI).deposit{value: value}(); // wrap only what is needed to pay
+            IWSEI(WSEI).transfer(recipient, value);
         } else if (payer == address(this)) {
             // pay with tokens already in the contract (for the exact input multihop case)
             TransferHelper.safeTransfer(token, recipient, value);

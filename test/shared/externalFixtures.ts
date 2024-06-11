@@ -2,18 +2,18 @@ import { abi as FACTORY_V2_ABI, bytecode as FACTORY_V2_BYTECODE } from '../contr
 import { abi as FACTORY_V1_ABI, bytecode as FACTORY_V1_BYTECODE } from '../contracts/DragonswapFactory.json'
 import { Fixture } from 'ethereum-waffle'
 import { ethers, waffle } from 'hardhat'
-import { IDragonswapV2Factory, IWETH9, MockTimeSwapRouter } from '../../typechain'
+import { IDragonswapV2Factory, IWSEI, MockTimeSwapRouter } from '../../typechain'
 
-import WETH9 from '../contracts/WETH9.json'
+import WSEI from '../contracts/WSEI.json'
 import { Contract } from '@ethersproject/contracts'
 
-const wethFixture: Fixture<{ weth9: IWETH9 }> = async ([wallet]) => {
-  const weth9 = (await waffle.deployContract(wallet, {
-    bytecode: WETH9.bytecode,
-    abi: WETH9.abi,
-  })) as IWETH9
+const wseiFixture: Fixture<{ wsei: IWSEI }> = async ([wallet]) => {
+  const wsei = (await waffle.deployContract(wallet, {
+    bytecode: WSEI.bytecode,
+    abi: WSEI.abi,
+  })) as IWSEI
 
-  return { weth9 }
+  return { wsei }
 }
 
 export const v1FactoryFixture: Fixture<{ factory: Contract }> = async ([wallet]) => {
@@ -37,17 +37,17 @@ const v2CoreFactoryFixture: Fixture<IDragonswapV2Factory> = async ([wallet]) => 
 }
 
 export const v2RouterFixture: Fixture<{
-  weth9: IWETH9
+  wsei: IWSEI
   factory: IDragonswapV2Factory
   router: MockTimeSwapRouter
 }> = async ([wallet], provider) => {
-  const { weth9 } = await wethFixture([wallet], provider)
+  const { wsei } = await wseiFixture([wallet], provider)
   const factory = await v2CoreFactoryFixture([wallet], provider)
 
   const router = (await (await ethers.getContractFactory('MockTimeSwapRouter')).deploy(
     factory.address,
-    weth9.address
+    wsei.address
   )) as MockTimeSwapRouter
 
-  return { factory, weth9, router }
+  return { factory, wsei, router }
 }

@@ -27,7 +27,7 @@ contract QuoterV2 is IQuoterV2, IDragonswapV2SwapCallback, PeripheryImmutableSta
     /// @dev Transient storage variable used to check a safety condition in exact output swaps.
     uint256 private amountOutCached;
 
-    constructor(address _factory, address _WETH9) PeripheryImmutableState(_factory, _WETH9) {}
+    constructor(address _factory, address _WSEI) PeripheryImmutableState(_factory, _WSEI) {}
 
     function getPool(
         address tokenA,

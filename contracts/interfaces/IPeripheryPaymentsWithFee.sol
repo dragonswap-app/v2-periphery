@@ -4,12 +4,12 @@ pragma solidity >=0.7.5;
 import './IPeripheryPayments.sol';
 
 /// @title Periphery Payments
-/// @notice Functions to ease deposits and withdrawals of ETH
+/// @notice Functions to ease deposits and withdrawals of SEI
 interface IPeripheryPaymentsWithFee is IPeripheryPayments {
-    /// @notice Unwraps the contract's WETH9 balance and sends it to recipient as ETH, with a percentage between
+    /// @notice Unwraps the contract's WSEI balance and sends it to recipient as SEI, with a percentage between
     /// 0 (exclusive), and 1 (inclusive) going to feeRecipient
-    /// @dev The amountMinimum parameter prevents malicious contracts from stealing WETH9 from users.
-    function unwrapWETH9WithFee(
+    /// @dev The amountMinimum parameter prevents malicious contracts from stealing WSEI from users.
+    function unwrapWSEIWithFee(
         uint256 amountMinimum,
         address recipient,
         uint256 feeBips,

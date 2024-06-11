@@ -43,7 +43,7 @@ describe('NonfungibleTokenPositionDescriptor', () => {
   let nftPositionDescriptor: NonfungibleTokenPositionDescriptor
   let tokens: [TestERC20, TestERC20, TestERC20]
   let nft: MockTimeNonfungiblePositionManager
-  let weth9: TestERC20
+  let wsei: TestERC20
 
   let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
 
@@ -56,12 +56,12 @@ describe('NonfungibleTokenPositionDescriptor', () => {
   beforeEach('load fixture', async () => {
     ;({ tokens, nft, nftPositionDescriptor } = await loadFixture(nftPositionDescriptorCompleteFixture))
     const tokenFactory = await ethers.getContractFactory('TestERC20')
-    weth9 = tokenFactory.attach(await nftPositionDescriptor.WETH9()) as TestERC20
+    wsei = tokenFactory.attach(await nftPositionDescriptor.WSEI()) as TestERC20
   })
 
   describe('#tokenRatioPriority', () => {
-    it('returns -100 for WETH9', async () => {
-      expect(await nftPositionDescriptor.tokenRatioPriority(weth9.address, 1)).to.eq(-100)
+    it('returns -100 for WSEI', async () => {
+      expect(await nftPositionDescriptor.tokenRatioPriority(wsei.address, 1)).to.eq(-100)
     })
 
     it('returns 200 for USDC', async () => {
@@ -99,7 +99,7 @@ describe('NonfungibleTokenPositionDescriptor', () => {
     })
 
     it('returns true if both tokens are denominators but token1 has lower priority ordering', async () => {
-      expect(await nftPositionDescriptor.flipRatio(weth9.address, WBTC, 1)).to.eq(true)
+      expect(await nftPositionDescriptor.flipRatio(wsei.address, WBTC, 1)).to.eq(true)
     })
 
     it('returns true if token0 is a numerator and token1 is a denominator', async () => {
@@ -112,15 +112,15 @@ describe('NonfungibleTokenPositionDescriptor', () => {
   })
 
   describe('#tokenURI', () => {
-    it('displays ETH as token symbol for WETH token', async () => {
-      const [token0, token1] = sortedTokens(weth9, tokens[1])
+    it('displays SEI as token symbol for WSEI token', async () => {
+      const [token0, token1] = sortedTokens(wsei, tokens[1])
       await nft.createAndInitializePoolIfNecessary(
         token0.address,
         token1.address,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
       )
-      await weth9.approve(nft.address, 100)
+      await wsei.approve(nft.address, 100)
       await tokens[1].approve(nft.address, 100)
       await nft.mint({
         token0: token0.address,
@@ -137,12 +137,12 @@ describe('NonfungibleTokenPositionDescriptor', () => {
       })
 
       const metadata = extractJSONFromURI(await nft.tokenURI(1))
-      expect(metadata.name).to.match(/(\sETH\/TEST|TEST\/ETH)/)
-      expect(metadata.description).to.match(/(TEST-ETH|\sETH-TEST)/)
-      expect(metadata.description).to.match(/(\nETH\sAddress)/)
+      expect(metadata.name).to.match(/(\sSEI\/TEST|TEST\/SEI)/)
+      expect(metadata.description).to.match(/(TEST-SEI|\sSEI-TEST)/)
+      expect(metadata.description).to.match(/(\nSEI\sAddress)/)
     })
 
-    it('displays returned token symbols when neither token is WETH ', async () => {
+    it('displays returned token symbols when neither token is WSEI ', async () => {
       const [token0, token1] = sortedTokens(tokens[2], tokens[1])
       await nft.createAndInitializePoolIfNecessary(
         token0.address,
@@ -172,14 +172,14 @@ describe('NonfungibleTokenPositionDescriptor', () => {
     })
 
     it('can render a different label for native currencies', async () => {
-      const [token0, token1] = sortedTokens(weth9, tokens[1])
+      const [token0, token1] = sortedTokens(wsei, tokens[1])
       await nft.createAndInitializePoolIfNecessary(
         token0.address,
         token1.address,
         FeeAmount.MEDIUM,
         encodePriceSqrt(1, 1)
       )
-      await weth9.approve(nft.address, 100)
+      await wsei.approve(nft.address, 100)
       await tokens[1].approve(nft.address, 100)
       await nft.mint({
         token0: token0.address,
@@ -203,7 +203,7 @@ describe('NonfungibleTokenPositionDescriptor', () => {
         },
       })
       const nftDescriptor = (await positionDescriptorFactory.deploy(
-        weth9.address,
+        wsei.address,
         // 'FUNNYMONEY' as a bytes32 string
         '0x46554e4e594d4f4e455900000000000000000000000000000000000000000000'
       )) as NonfungibleTokenPositionDescriptor
