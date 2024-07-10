@@ -72,7 +72,7 @@ contract NonfungiblePositionManager is
         address _factory,
         address _WSEI,
         address _tokenDescriptor_
-    ) ERC721Permit('Dragonswap V2 Positions NFT-V1', 'UNI-V2-POS', '1') PeripheryImmutableState(_factory, _WSEI) {
+    ) ERC721Permit('Dragonswap V2 Positions NFT-V1', 'DGS-V2-POS', '1') PeripheryImmutableState(_factory, _WSEI) {
         _tokenDescriptor = _tokenDescriptor_;
     }
 
