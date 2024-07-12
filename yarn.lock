@@ -227,7 +227,7 @@
 
 "@dragonswap/v2-core@git+ssh://git@github.com:dragonswap-app/v2-core.git":
   version "1.0.0"
-  resolved "git+ssh://git@github.com:dragonswap-app/v2-core.git#5a29134e19f9b3e56e89083cde1c51a3759fe0d7"
+  resolved "git+ssh://git@github.com:dragonswap-app/v2-core.git#8985d425aa9b2d39428b305fb90c8b932e85002d"
 
 "@ensdomains/ens@^0.4.4":
   version "0.4.5"
