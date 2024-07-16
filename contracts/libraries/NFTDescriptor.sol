@@ -2,9 +2,7 @@
 pragma solidity >=0.7.0;
 pragma abicoder v2;
 
-import '@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Pool.sol';
 import '@dragonswap/v2-core/contracts/libraries/TickMath.sol';
-import '@dragonswap/v2-core/contracts/libraries/BitMath.sol';
 import '@dragonswap/v2-core/contracts/libraries/FullMath.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';

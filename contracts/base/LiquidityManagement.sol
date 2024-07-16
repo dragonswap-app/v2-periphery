@@ -2,7 +2,6 @@
 pragma solidity =0.7.6;
 pragma abicoder v2;
 
-import '@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Factory.sol';
 import '@dragonswap/v2-core/contracts/interfaces/callback/IDragonswapV2MintCallback.sol';
 import '@dragonswap/v2-core/contracts/libraries/TickMath.sol';
 

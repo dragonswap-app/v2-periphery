@@ -4,11 +4,9 @@ pragma solidity >=0.6.8 <0.8.0;
 import '@dragonswap/v2-core/contracts/interfaces/IDragonswapV2Pool.sol';
 import '@dragonswap/v2-core/contracts/libraries/FixedPoint128.sol';
 import '@dragonswap/v2-core/contracts/libraries/TickMath.sol';
-import '@dragonswap/v2-core/contracts/libraries/Tick.sol';
 import '../interfaces/INonfungiblePositionManager.sol';
 import './LiquidityAmounts.sol';
 import './PoolAddress.sol';
-import './PositionKey.sol';
 
 /// @title Returns information about the token value held in a Dragonswap V2 NFT
 library PositionValue {

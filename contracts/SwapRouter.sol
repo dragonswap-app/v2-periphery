@@ -15,7 +15,6 @@ import './base/SelfPermit.sol';
 import './libraries/Path.sol';
 import './libraries/PoolAddress.sol';
 import './libraries/CallbackValidation.sol';
-import './interfaces/external/IWSEI.sol';
 
 /// @title Dragonswap V2 Swap Router
 /// @notice Router for stateless execution of swaps against Dragonswap V2
