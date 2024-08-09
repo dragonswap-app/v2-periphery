@@ -29,7 +29,7 @@ jobs:
             yarn-
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-engines
 
       # This is required separately from yarn test because it generates the typechain definitions
       - name: Compile
