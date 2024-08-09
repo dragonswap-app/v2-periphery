@@ -14,7 +14,6 @@ import './libraries/NFTDescriptor.sol';
 /// @title Describes NFT token positions
 /// @notice Produces a string containing the data URI for a JSON metadata string
 contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescriptor {
-
     address public immutable WSEI;
     /// @dev A null-terminated string
     bytes32 public immutable nativeCurrencyLabelBytes;
@@ -55,7 +54,7 @@ contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescript
                 )
             );
 
-        bool _flipRatio = flipRatio(token0, token1); 
+        bool _flipRatio = flipRatio(token0, token1);
         address quoteTokenAddress = !_flipRatio ? token1 : token0;
         address baseTokenAddress = !_flipRatio ? token0 : token1;
         (, int24 tick, , , , , ) = pool.slot0();
@@ -85,10 +84,7 @@ contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescript
             );
     }
 
-    function flipRatio(
-        address token0,
-        address token1
-    ) public view returns (bool) {
+    function flipRatio(address token0, address token1) public view returns (bool) {
         return tokenRatioPriority(token0) > tokenRatioPriority(token1);
     }
 

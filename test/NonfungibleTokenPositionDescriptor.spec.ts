@@ -69,7 +69,9 @@ describe('NonfungibleTokenPositionDescriptor', () => {
     })
 
     it('returns true if token1 has lower priority ordering', async () => {
-      expect(await nftPositionDescriptor.flipRatio("0000000000000000000000000000000000000001", wsei.address)).to.eq(true)
+      expect(await nftPositionDescriptor.flipRatio('0000000000000000000000000000000000000001', wsei.address)).to.eq(
+        true
+      )
     })
   })
 
