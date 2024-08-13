@@ -7,6 +7,10 @@ This repository contains the periphery smart contracts for the Dragonswap V2 Pro
 For the lower level core contracts, see the [dragonswap-v2-core](https://github.com/Dragonswap/dragonswap-v2-core)
 repository.
 
+## Links
+
+- [Audit report](https://github.com/dragonswap-app/v2-core/blob/main/audits/20240801_Paladin_DragonSwapDEX_Final_Report.pdf)
+
 ## Local deployment
 
 In order to deploy this code to a local testnet, you should clone this repository and import bytecode imported from artifacts located at
